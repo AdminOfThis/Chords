@@ -6,6 +6,7 @@ jdk:
 - openjdk12
 os:
 - linux
+install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true --batch-mode --show-version --settings .travis.settings.xml
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
