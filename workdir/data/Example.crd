@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="12.0.1" class="java.beans.XMLDecoder">
+ <object class="data.Song">
+  <void property="author">
+   <string>Florian Hild</string>
+  </void>
+  <void property="capo">
+   <int>2</int>
+  </void>
+  <void property="changed">
+   <boolean>true</boolean>
+  </void>
+  <void property="key">
+   <string>C</string>
+  </void>
+  <void property="name">
+   <string>Example</string>
+  </void>
+  <void property="text">
+   <object class="java.util.Collections" method="synchronizedList">
+    <object class="java.util.ArrayList">
+     <void method="add">
+      <string>[A] This is a test</string>
+     </void>
+     <void method="add">
+      <string>[b]with tow lines</string>
+     </void>
+     <void method="add">
+      <string>[Am] Well it works, [c]but not really good</string>
+     </void>
+     <void method="add">
+      <string>[d]Why is it hanging so much?</string>
+     </void>
+     <void method="add">
+      <string>[A]This is not good</string>
+     </void>
+     <void method="add">
+      <string>[D] But at least it works</string>
+     </void>
+     <void method="add">
+      <string>[Cis]This is a [a]test</string>
+     </void>
+     <void method="add">
+      <string>[C]Ok now let me try this, how does this work?</string>
+     </void>
+    </object>
+   </object>
+  </void>
+ </object>
+</java>
