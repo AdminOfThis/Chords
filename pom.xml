@@ -6,8 +6,11 @@
 	<artifactId>chords</artifactId>
 	<version>1.0.0</version>
 	<name>Chords</name>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 
+	<modules>
+		<module>util</module>
+	</modules>
 
 
 	<dependencies>
@@ -24,11 +27,6 @@
 			<version>2.0.15</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.github.adminofthis</groupId>
-			<artifactId>util</artifactId>
-			<version>1.0</version>
-		</dependency>
 	</dependencies>
 
 	<build>
