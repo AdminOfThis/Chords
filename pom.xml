@@ -2,15 +2,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.github.adminofthis</groupId>
 	<artifactId>chords</artifactId>
+	<version>1.0.0</version>
 	<name>Chords</name>
 	<packaging>jar</packaging>
 
-	<parent>
-		<groupId>com.github.adminofthis</groupId>
-		<artifactId>util</artifactId>
-		<version>1.0.0</version>
-	</parent>
+
 
 	<dependencies>
 
@@ -78,4 +76,16 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>bintray</id>
+			<name>bintray</name>
+			<url>https://dl.bintray.com/adminofthis/Util</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+	</repositories>
 </project>
