@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>chords</artifactId>
 	<name>Chords</name>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 
 	<parent>
 		<groupId>com.github.adminofthis</groupId>
@@ -13,6 +13,13 @@
 	</parent>
 
 	<dependencies>
+	
+		<dependency>
+		<groupId>com.github.adminofthis</groupId>
+			<artifactId>util</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+	
 		<!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
