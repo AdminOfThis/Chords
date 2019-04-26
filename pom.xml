@@ -13,13 +13,13 @@
 	</parent>
 
 	<dependencies>
-	
+
 		<dependency>
-		<groupId>com.github.adminofthis</groupId>
+			<groupId>com.github.adminofthis</groupId>
 			<artifactId>util</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-	
+
 		<!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
