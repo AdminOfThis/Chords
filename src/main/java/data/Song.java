@@ -10,7 +10,8 @@ public class Song implements Serializable, Cloneable {
 	/**
 	 * 
 	 */
-	private static final long	serialVersionUID	= -4337440346930134851L;
+	private static final long	serialVersionUID	= 1L;
+	public static final int		MAX_CHORD_LENGTH	= 9;
 	private String				name;
 	private transient String	oldName;
 	private String				key;
@@ -18,6 +19,7 @@ public class Song implements Serializable, Cloneable {
 	private int					capo				= 0;
 	private List<String>		comments			= Collections.synchronizedList(new ArrayList<String>());
 	private List<String>		text				= Collections.synchronizedList(new ArrayList<String>());
+	private List<String>		tagList				= Collections.synchronizedList(new ArrayList<String>());
 	private boolean				changed				= false;
 
 	public Song() {}
@@ -116,8 +118,25 @@ public class Song implements Serializable, Cloneable {
 	}
 
 	public static String getCleanLine(String line) {
-		String rawLine = line.replaceAll("\\[.{1,3}?\\]", "");
+		String rawLine = line.replaceAll("\\[.{1," + MAX_CHORD_LENGTH + "}?\\]", "");
 		rawLine = rawLine.replaceAll("  ", " ");
-		return rawLine.trim();
+		if (rawLine.startsWith(" ")) {
+			rawLine = rawLine.replaceFirst(" ", "");
+		}
+		return rawLine;
+	}
+
+	public void addTag(String tag) {
+		if (!tagList.contains(tag)) {
+			tagList.add(tag);
+		}
+	}
+
+	public List<String> getTags() {
+		return tagList;
+	}
+
+	public void removeTag(String tag) {
+		tagList.remove(tag);
 	}
 }

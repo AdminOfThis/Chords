@@ -1,11 +1,14 @@
 package main;
 
+import java.io.IOException;
+
 import gui.FXMLUtil;
 import gui.MainGUI;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import util.FileIO;
 
 public class Main extends MainGUI {
 
@@ -16,6 +19,12 @@ public class Main extends MainGUI {
 	public static void main(String[] args) {
 		MainGUI.initialize(POM_TITLE);
 		LOG.info("Started");
+		try {
+			FileIO.loadProperties();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 		launch(args);
 	}
 

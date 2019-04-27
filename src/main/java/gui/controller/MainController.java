@@ -29,6 +29,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
@@ -99,6 +100,12 @@ public class MainController implements Initializable {
 		txtSearch.textProperty().addListener(e -> {
 			search();
 		});
+		txtCapo.textProperty().addListener((obs, oldV, newV) -> {
+			if (!newV.matches("[123]*")) {
+				txtCapo.setText(oldV);
+			}
+		});
+		list.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		list.setCellFactory(e -> {
 			ListCell<Song> cell = new ListCell<Song>() {
 
@@ -118,7 +125,7 @@ public class MainController implements Initializable {
 				}
 			};
 			cell.setOnContextMenuRequested(ex -> {
-				ListContextMenu con = new ListContextMenu();
+				ListContextMenu con = new ListContextMenu(cell);
 				con.show(cell, ex.getScreenX(), ex.getScreenY());
 			});
 			return cell;
@@ -280,12 +287,13 @@ public class MainController implements Initializable {
 
 	public void print(ActionEvent e) {
 		showStatus("Printing");
-		Song song = getUnsavedSong();
-		if (song != null) {
-			File pdf = new File(SongPrinter.DEFAULT_FOLDER + song.getName() + ".pdf");
-			SongPrinter.print(song, pdf);
-			showStatus("Printed");
+		for (Song song : list.getSelectionModel().getSelectedItems()) {
+			if (song != null) {
+				File pdf = new File(SongPrinter.DEFAULT_FOLDER + song.getName() + ".pdf");
+				SongPrinter.print(song, pdf);
+			}
 		}
+		showStatus("Printed");
 	}
 
 	private Song getUnsavedSong() {
@@ -295,9 +303,18 @@ public class MainController implements Initializable {
 				song = song.copy();
 				song.setText(getText());
 				song.setName(txtName.getText().trim());
-				song.setAuthor(txtAuthor.getText().trim());
-				song.setKey(txtKey.getText().trim());
-				song.setCapo(Integer.parseInt(txtCapo.getText().trim()));
+				String author = txtAuthor.getText();
+				if (author != null && !author.isBlank()) {
+					song.setAuthor(author.trim());
+				}
+				String key = txtKey.getText();
+				if (key != null && !key.isBlank()) {
+					song.setKey(key.trim());
+				}
+				String capo = txtCapo.getText();
+				if (capo != null && !capo.isBlank()) {
+					song.setCapo(Integer.parseInt(capo.trim()));
+				}
 			}
 		}
 		return song;
@@ -391,13 +408,13 @@ public class MainController implements Initializable {
 		search();
 	}
 
-	private void createPreview() {
+	private synchronized void createPreview() {
 		if (background == null || !background.isAlive()) {
 			background = new Thread() {
 
 				@Override
 				public void run() {
-					File temp;
+					File temp = null;
 					try {
 						temp = File.createTempFile("chord_preview", ".tmp");
 						SongPrinter.print(getUnsavedSong(), temp);
@@ -410,10 +427,12 @@ public class MainController implements Initializable {
 								e.printStackTrace();
 							}
 						});
-						temp.delete();
 					}
 					catch (Exception e1) {
 						e1.printStackTrace();
+					}
+					finally {
+						temp.delete();
 					}
 				}
 			};
