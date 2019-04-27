@@ -24,7 +24,7 @@ public final class SongPrinter {
 
 	private static final Logger					LOG				= Logger.getLogger(SongPrinter.class);
 	private static float						MARGIN_TITLE	= 50;
-	private static float						MARGIN_LEFT		= 75;
+	private static float						MARGIN_LEFT		= 0;
 	private static final PDFont					TITLE_FONT		= PDType1Font.HELVETICA_BOLD;
 	private static final int					TITLE_FONT_SIZE	= 18;
 	private static final PDFont					META_FONT		= PDType1Font.HELVETICA_OBLIQUE;
@@ -33,6 +33,7 @@ public final class SongPrinter {
 	private static final int					MAIN_FONT_SIZE	= 14;
 	private static final int					SUB_FONT_SIZE	= 12;
 	private static final PDFont					CHORD_FONT		= PDType1Font.HELVETICA_BOLD_OBLIQUE;
+	private static final int					CHORD_FONT_SIZE	= 11;
 	private static final PDFont					COMMENT_FONT	= PDType1Font.HELVETICA_BOLD;
 	static HashMap<PDPage, PDPageContentStream>	streamMap		= new HashMap<>();
 	public static final String					DEFAULT_FOLDER	= "./print/";
@@ -176,9 +177,11 @@ public final class SongPrinter {
 			if (rawLine.isBlank()) {
 				stream.setFont(COMMENT_FONT, SUB_FONT_SIZE);
 			} else {
-				stream.setFont(CHORD_FONT, MAIN_FONT_SIZE);
+				stream.setFont(CHORD_FONT, CHORD_FONT_SIZE);
 			}
-			int totalOffset = 0;
+			float totalOffset = 0;
+			int bonusOffset = 0;
+			float previousChords = 0;
 			for (Entry<Integer, String> entry : chordMap.entrySet()) {
 				String chord = formatChord(entry.getValue());
 				if (chord != null) {
@@ -187,25 +190,40 @@ public final class SongPrinter {
 					int missing = subLine.length() - Song.getCleanLine(subLine).length();
 					String substring = rawLine.substring(0, index - missing);
 					float offset = (MAIN_FONT.getStringWidth(substring) / 1000.0f * MAIN_FONT_SIZE) - totalOffset;
-					if (totalOffset > 10 && offset < 10) {
-						System.out.println("BREAK " + chord);
+					if (totalOffset > 10 && offset < previousChords && offset < 10) {
 						stream.newLineAtOffset(10, 0);
+						bonusOffset += 10;
 					} else {
 						stream.newLineAtOffset(offset, 0);
+						totalOffset += offset;
 					}
-					totalOffset += offset;
-					stream.showText(chord);
+					if (!chord.matches(".*\\d.*")) {
+						stream.showText(chord);
+						previousChords = (CHORD_FONT.getStringWidth(chord) / 1000.0f * CHORD_FONT_SIZE) + 50;
+					} else {
+						String base = chord.replaceAll("\\d", "");
+						String sup = chord.replaceAll("\\D", "");
+						stream.showText(base);
+						stream.setFont(CHORD_FONT, CHORD_FONT_SIZE / 1.2f);
+						float x = (CHORD_FONT.getStringWidth(base) / 1000.0f * CHORD_FONT_SIZE);
+						stream.newLineAtOffset(x, (CHORD_FONT_SIZE / 1.2f) / 2f);
+						stream.showText(sup);
+						stream.setFont(CHORD_FONT, CHORD_FONT_SIZE);
+						stream.newLineAtOffset(-x, -(CHORD_FONT_SIZE / 1.2f) / 2f);
+						previousChords = x + 50;
+						previousChords += (CHORD_FONT.getStringWidth(sup) / 1000.0f * (CHORD_FONT_SIZE / 1.2f) / 2f);
+					}
 				}
 			}
 			int lines = 0;
 			if (!chordMap.isEmpty()) {
-				stream.newLineAtOffset(0, -1.2f * MAIN_FONT_SIZE);
+				stream.newLineAtOffset(0, -1.2f * CHORD_FONT_SIZE);
 				stream.setFont(MAIN_FONT, MAIN_FONT_SIZE);
 				line += 1;
 			} else {
 				stream.setFont(MAIN_FONT, SUB_FONT_SIZE);
 			}
-			stream.newLineAtOffset(-totalOffset, 0);
+			stream.newLineAtOffset(-(totalOffset + bonusOffset), 0);
 			if (!rawLine.isBlank()) {
 				stream.showText(rawLine);
 				lines += 1;
@@ -224,8 +242,8 @@ public final class SongPrinter {
 	private static String formatChord(final String value) {
 		try {
 			String chord = value;
-			if (value.length() == 1 && value.matches("[a-z]")) {
-				chord = value.toUpperCase() + "m";
+			if (!value.matches("[A-Z]")) {
+				chord = value.substring(0, 1).toUpperCase() + "m" + value.substring(1);
 			}
 			chord = chord.substring(0, 1).toUpperCase() + chord.substring(1).toLowerCase();
 			LOG.debug("Changed key \"" + value + "\" to \"" + chord + "\"");
