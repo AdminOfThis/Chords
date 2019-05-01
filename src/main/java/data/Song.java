@@ -2,7 +2,6 @@ package data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Song implements Serializable, Cloneable {
@@ -10,17 +9,17 @@ public class Song implements Serializable, Cloneable {
 	/**
 	 * 
 	 */
-	private static final long	serialVersionUID	= 1L;
+	private static final long	serialVersionUID	= -6044484874179480864L;
 	public static final int		MAX_CHORD_LENGTH	= 9;
 	private String				name;
 	private transient String	oldName;
+	private transient boolean	changed				= false;
 	private String				key;
 	private String				author;
 	private int					capo				= 0;
-	private List<String>		comments			= Collections.synchronizedList(new ArrayList<String>());
-	private List<String>		text				= Collections.synchronizedList(new ArrayList<String>());
-	private List<String>		tagList				= Collections.synchronizedList(new ArrayList<String>());
-	private boolean				changed				= false;
+	private List<String>		comments			= new ArrayList<>();
+	private List<String>		text				= new ArrayList<>();
+	private List<String>		tagList				= new ArrayList<>();
 
 	public Song() {}
 

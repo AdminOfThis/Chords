@@ -21,6 +21,7 @@ public class Main extends MainGUI {
 		LOG.info("Started");
 		try {
 			FileIO.loadProperties();
+			FileIO.cleanUpPreview();
 		}
 		catch (IOException e) {
 			e.printStackTrace();

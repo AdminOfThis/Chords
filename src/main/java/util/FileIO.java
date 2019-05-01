@@ -1,25 +1,26 @@
 package util;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.thoughtworks.xstream.XStream;
 
 import data.Song;
 
 public final class FileIO {
 
-	private static final Logger	LOG				= Logger.getLogger(FileIO.class);
+	private static final Logger	LOG				= LogManager.getLogger(FileIO.class);
 	public static final String	FILE_EXTENSION	= ".crd";
 	public static final String	DEFAULT_FOLDER	= "./data/";
 	public static final String	PROPERTIES_FILE	= "./settings.cfg";
@@ -30,15 +31,18 @@ public final class FileIO {
 		File file = new File(DEFAULT_FOLDER + song.getName() + FILE_EXTENSION);
 		checkAndCreateFolder(file);
 		checkForNameChange(song);
-		XMLEncoder encoder = null;
 		try {
-			encoder = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(file)));
-			encoder.writeObject(song);
-			encoder.close();
+			XStream stream = new XStream();
+			stream.allowTypesByRegExp(new String[] { ".*" });
+			String xml = stream.toXML(song);
+			FileWriter writer = new FileWriter(file);
+			writer.write(xml);
+			writer.flush();
+			writer.close();
 			return true;
 		}
-		catch (Exception fileNotFound) {
-			fileNotFound.printStackTrace();
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -76,15 +80,23 @@ public final class FileIO {
 		Song song = null;
 		try {
 			if (file.getName().endsWith(FILE_EXTENSION)) {
-				XMLDecoder decoder = null;
-				try {
-					decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(file)));
+				BufferedReader reader = new BufferedReader(new FileReader(file));
+				String xml = "";
+				String line = "";
+				boolean first = true;
+				while ((line = reader.readLine()) != null) {
+					if (first) {
+						first = false;
+					} else {
+						xml += "\r\n";
+					}
+					xml += line;
 				}
-				catch (FileNotFoundException e) {
-					System.out.println("ERROR: File dvd.xml not found");
-				}
-				song = (Song) decoder.readObject();
+				XStream stream = new XStream();
+				stream.allowTypesByRegExp(new String[] { ".*" });
+				song = (Song) stream.fromXML(xml);
 				song.setChanged(false);
+				reader.close();
 			}
 		}
 		catch (Exception e) {
@@ -159,6 +171,15 @@ public final class FileIO {
 		}
 		catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public static void cleanUpPreview() {
+		File folder = new File(".");
+		for (File file : folder.listFiles()) {
+			if (file.getName().startsWith(SongPrinter.CHORD_PREVIEW)) {
+				file.delete();
+			}
 		}
 	}
 }

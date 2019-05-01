@@ -8,7 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -22,9 +23,10 @@ import data.Song;
 
 public final class SongPrinter {
 
-	private static final Logger					LOG				= Logger.getLogger(SongPrinter.class);
+	public static final String					CHORD_PREVIEW	= "chord_preview";
+	private static final Logger					LOG				= LogManager.getLogger(SongPrinter.class);
 	private static float						MARGIN_TITLE	= 50;
-	private static float						MARGIN_LEFT		= 0;
+	private static float						MARGIN_LEFT		= 75;
 	private static final PDFont					TITLE_FONT		= PDType1Font.HELVETICA_BOLD;
 	private static final int					TITLE_FONT_SIZE	= 18;
 	private static final PDFont					META_FONT		= PDType1Font.HELVETICA_OBLIQUE;
@@ -197,7 +199,7 @@ public final class SongPrinter {
 						stream.newLineAtOffset(offset, 0);
 						totalOffset += offset;
 					}
-					if (!chord.matches(".*\\d.*")) {
+					if (!chord.matches(".*\\d.*") || chord.contains(" ")) {
 						stream.showText(chord);
 						previousChords = (CHORD_FONT.getStringWidth(chord) / 1000.0f * CHORD_FONT_SIZE) + 50;
 					} else {
@@ -242,7 +244,7 @@ public final class SongPrinter {
 	private static String formatChord(final String value) {
 		try {
 			String chord = value;
-			if (!value.matches("[A-Z]")) {
+			if (value.matches("[a-z].*")) {
 				chord = value.substring(0, 1).toUpperCase() + "m" + value.substring(1);
 			}
 			chord = chord.substring(0, 1).toUpperCase() + chord.substring(1).toLowerCase();

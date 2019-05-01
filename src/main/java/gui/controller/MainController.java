@@ -9,7 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import data.Song;
 import gui.FXMLUtil;
@@ -47,7 +48,7 @@ import util.SongPrinter;
 
 public class MainController implements Initializable {
 
-	private static final Logger		LOG			= Logger.getLogger(MainController.class);
+	private static final Logger		LOG			= LogManager.getLogger(MainController.class);
 	private static MainController	instance;
 	@FXML
 	private MenuItem				mnSave;
@@ -64,7 +65,7 @@ public class MainController implements Initializable {
 	@FXML
 	private Label					lblStatus;
 	@FXML
-	private ToggleButton			tglContent, tglPreview;
+	private ToggleButton			tglContent, tglPreview, tglChords;
 	@FXML
 	private ImageView				image;
 	@FXML
@@ -72,6 +73,7 @@ public class MainController implements Initializable {
 	private TextInputControl[]		changeWatchList;
 	private List<Song>				songList	= new ArrayList<>();
 	private Thread					background;
+	long							lastSpace	= 0;
 
 	public static MainController getInstance() {
 		return instance;
@@ -107,7 +109,7 @@ public class MainController implements Initializable {
 		});
 		list.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		list.setCellFactory(e -> {
-			ListCell<Song> cell = new ListCell<Song>() {
+			ListCell<Song> cell = new ListCell<>() {
 
 				@Override
 				protected void updateItem(Song item, boolean empty) {
@@ -150,6 +152,42 @@ public class MainController implements Initializable {
 			if (e.getCode() == KeyCode.ALT_GRAPH) {
 				e.consume();
 				return;
+			}
+		});
+		txtArea.setOnKeyReleased(e -> {
+			if (e.isAltDown() && e.isControlDown() && e.getCode() == KeyCode.DIGIT9) {
+				txtArea.positionCaret(txtArea.getCaretPosition() - 1);
+			}
+		});
+		txtArea.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.SPACE) {
+				if (System.currentTimeMillis() - lastSpace < 100) {
+					tglChords.fire();
+					e.consume();
+				}
+				lastSpace = System.currentTimeMillis();
+			}
+		});
+		txtArea.setOnKeyTyped(e -> {
+			if (tglChords.isSelected()) {
+				int caretPos = txtArea.getCaretPosition();
+				String sbefore = null;
+				if (caretPos > 0) {
+					sbefore = txtArea.getText().substring(caretPos - 1, caretPos);
+				}
+				String safter = null;
+				if (caretPos >= txtArea.getText().length()) {
+					safter = txtArea.getText().substring(caretPos, caretPos + 1);
+				}
+				if (sbefore == null || safter == null || (!sbefore.equals("[") && !safter.equals("]"))) {
+					String text = txtArea.getText(0, caretPos - 1) + "[" + txtArea.getText(caretPos - 1, txtArea.getText().length());
+					txtArea.setText(text);
+					txtArea.positionCaret(caretPos);
+					String text2 = txtArea.getText(0, caretPos + 1) + "]" + txtArea.getText(caretPos + 1, txtArea.getText().length());
+					txtArea.setText(text2);
+					txtArea.positionCaret(caretPos + 1);
+				}
+				e.consume();
 			}
 		});
 		txtArea.textProperty().addListener(e -> checkForChange());
@@ -237,6 +275,11 @@ public class MainController implements Initializable {
 				createPreview();
 			}
 			list.refresh();
+			if (song.getName().equals("New Song")) {
+				txtName.positionCaret(0);
+				txtName.selectPositionCaret(txtName.getText().length());
+				Platform.runLater(() -> txtName.requestFocus());
+			}
 		}
 	}
 
@@ -414,9 +457,10 @@ public class MainController implements Initializable {
 
 				@Override
 				public void run() {
+					FileIO.cleanUpPreview();
 					File temp = null;
 					try {
-						temp = File.createTempFile("chord_preview", ".tmp");
+						temp = File.createTempFile(SongPrinter.CHORD_PREVIEW, ".tmp");
 						SongPrinter.print(getUnsavedSong(), temp);
 						File pic = SongPrinter.pdfToPic(temp);
 						Platform.runLater(() -> {
@@ -425,6 +469,11 @@ public class MainController implements Initializable {
 							}
 							catch (FileNotFoundException e) {
 								e.printStackTrace();
+							}
+							finally {
+								if (!pic.delete()) {
+									pic.deleteOnExit();
+								}
 							}
 						});
 					}

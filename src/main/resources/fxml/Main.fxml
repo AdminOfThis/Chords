@@ -17,7 +17,6 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -25,7 +24,7 @@
    <center>
       <SplitPane dividerPositions="0.18, 0.55" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <items>
-            <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0">
+            <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" SplitPane.resizableWithParent="false">
                <children>
                   <HBox>
                      <children>
@@ -34,20 +33,22 @@
                      </children>
                   </HBox>
                   <ListView fx:id="list" prefHeight="200.0" prefWidth="150.0" VBox.vgrow="SOMETIMES" />
-                  <HBox spacing="5.0">
+                  <FlowPane hgap="5.0" vgap="5.0">
                      <children>
                         <Button mnemonicParsing="false" onAction="#newSong" prefWidth="75.0" text="New Song" />
-                        <Pane HBox.hgrow="SOMETIMES" />
                         <Button fx:id="btnPrint" mnemonicParsing="false" onAction="#print" prefWidth="75.0" text="Print" />
                         <ToggleButton fx:id="tglPreview" mnemonicParsing="false" prefWidth="75.0" selected="true" text="Preview" />
                      </children>
-                  </HBox>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </FlowPane>
                </children>
                <padding>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </padding>
             </VBox>
-            <VBox>
+            <VBox spacing="5.0">
                <children>
                   <FlowPane hgap="5.0" vgap="5.0">
                      <children>
@@ -76,15 +77,20 @@
                            </children>
                         </HBox>
                      </children>
-                     <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                     </padding>
                   </FlowPane>
-                  <TextArea fx:id="txtArea" promptText="Song Text" wrapText="true" VBox.vgrow="SOMETIMES">
+                  <TextArea fx:id="txtArea" promptText="Song Text" style="-fx-control-inner-background: #222222;" wrapText="true" VBox.vgrow="SOMETIMES">
                      <font>
                         <Font size="18.0" />
                      </font></TextArea>
+                  <FlowPane>
+                     <children>
+                        <ToggleButton fx:id="tglChords" mnemonicParsing="false" prefWidth="75.0" text="Chords" />
+                     </children>
+                  </FlowPane>
                </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
             </VBox>
             <BorderPane fx:id="imgParent">
                <center>
