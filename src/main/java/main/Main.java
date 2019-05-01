@@ -5,6 +5,7 @@ import java.io.IOException;
 import gui.FXMLUtil;
 import gui.MainGUI;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -31,7 +32,8 @@ public class Main extends MainGUI {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		Parent p = FXMLUtil.loadFXML(GUI_PATH);
+// Parent p = FXMLUtil.loadFXML(GUI_PATH);
+		Parent p = FXMLLoader.load(Main.class.getResource(GUI_PATH));
 		Scene scene = new Scene(p);
 		stage.setScene(scene);
 		stage.show();

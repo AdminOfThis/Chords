@@ -1,20 +1,20 @@
 package util;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.thoughtworks.xstream.XStream;
 
 import data.Song;
 
@@ -27,24 +27,54 @@ public final class FileIO {
 	private static final String	TAG_KEY			= "Tags";
 	private static Properties	props			= new Properties();
 
+	public static boolean save(List<Song> songList) {
+		boolean result = true;
+		for (Song s : songList) {
+			boolean res = save(s);
+			if (!res) {
+				result = false;
+			}
+		}
+		return result;
+	}
+
 	public static boolean save(Song song) {
-		File file = new File(DEFAULT_FOLDER + song.getName() + FILE_EXTENSION);
-		checkAndCreateFolder(file);
-		checkForNameChange(song);
 		try {
-			XStream stream = new XStream();
-			stream.allowTypesByRegExp(new String[] { ".*" });
-			String xml = stream.toXML(song);
-			FileWriter writer = new FileWriter(file);
-			writer.write(xml);
-			writer.flush();
-			writer.close();
+			File file = new File(DEFAULT_FOLDER + song.getName() + FILE_EXTENSION);
+			checkAndCreateFolder(file);
+			checkForNameChange(song);
+			// Create JAXB Context
+			JAXBContext jaxbContext = JAXBContext.newInstance(Song.class);
+			// Create Marshaller
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+			// Required formatting??
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			// Store XML to File
+			// Writes XML file to file-system
+			song.setChanged(false);
+			jaxbMarshaller.marshal(song, file);
 			return true;
 		}
-		catch (Exception e) {
+		catch (JAXBException e) {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public static Song load(File file) {
+		JAXBContext jaxbContext;
+		Song song = null;
+		try {
+			if (file.getName().endsWith(FILE_EXTENSION)) {
+				jaxbContext = JAXBContext.newInstance(Song.class);
+				Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+				song = (Song) jaxbUnmarshaller.unmarshal(file);
+			}
+		}
+		catch (JAXBException e) {
+			LOG.warn("Error loading " + file.getName(), e);
+		}
+		return song;
 	}
 
 	private static void checkForNameChange(Song song) {
@@ -63,46 +93,6 @@ public final class FileIO {
 			LOG.info("Parent folder does not exist, creating folder");
 			parent.mkdirs();
 		}
-	}
-
-	public static boolean save(List<Song> songList) {
-		boolean result = true;
-		for (Song s : songList) {
-			boolean res = save(s);
-			if (!res) {
-				result = false;
-			}
-		}
-		return result;
-	}
-
-	public static Song load(File file) {
-		Song song = null;
-		try {
-			if (file.getName().endsWith(FILE_EXTENSION)) {
-				BufferedReader reader = new BufferedReader(new FileReader(file));
-				String xml = "";
-				String line = "";
-				boolean first = true;
-				while ((line = reader.readLine()) != null) {
-					if (first) {
-						first = false;
-					} else {
-						xml += "\r\n";
-					}
-					xml += line;
-				}
-				XStream stream = new XStream();
-				stream.allowTypesByRegExp(new String[] { ".*" });
-				song = (Song) stream.fromXML(xml);
-				song.setChanged(false);
-				reader.close();
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		return song;
 	}
 
 	public static List<Song> loadFolder(File file) {
@@ -146,7 +136,6 @@ public final class FileIO {
 			FileInputStream fi = new FileInputStream(file);
 			props.load(fi);
 			fi.close();
-			System.out.println("After Loading properties: " + props);
 		}
 	}
 

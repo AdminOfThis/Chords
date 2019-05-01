@@ -4,6 +4,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Song implements Serializable, Cloneable {
 
 	/**
@@ -41,6 +46,8 @@ public class Song implements Serializable, Cloneable {
 		this.name = name;
 	}
 
+	@XmlElementWrapper(name = "text")
+	@XmlElement(name = "line")
 	public List<String> getText() {
 		return text;
 	}
@@ -74,6 +81,8 @@ public class Song implements Serializable, Cloneable {
 		this.author = author;
 	}
 
+	@XmlElementWrapper(name = "comments")
+	@XmlElement(name = "comment")
 	public List<String> getComments() {
 		return comments;
 	}
@@ -131,6 +140,8 @@ public class Song implements Serializable, Cloneable {
 		}
 	}
 
+	@XmlElementWrapper(name = "tags")
+	@XmlElement(name = "tag")
 	public List<String> getTags() {
 		return tagList;
 	}
